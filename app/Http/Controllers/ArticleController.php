@@ -12,21 +12,25 @@ class ArticleController extends Controller
         $query = Article::query();
 
         if ($request->has('search')) {
-            $query->where('title', 'like', '%' . $request->input('search') . '%')
-                  ->orWhere('content', 'like', '%' . $request->input('search') . '%');
+            $query->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('content', 'like', '%' . $request->search . '%');
         }
 
         if ($request->has('category')) {
             $query->whereHas('categories', function ($q) use ($request) {
-                $q->where('name', $request->input('category'));
+                $q->where('name', $request->category);
             });
         }
 
-        if ($request->has('author')) {
-            $query->where('author', $request->input('author'));
+        if ($request->has('source')) {
+            $query->where('source', $request->source);
         }
 
-        $articles = $query->get();
+        if ($request->has('author')) {
+            $query->where('author', $request->author);
+        }
+
+        $articles = $query->with('categories')->paginate(10);
 
         return response()->json($articles);
     }
